@@ -1,0 +1,10 @@
+{
+  "name": "TTC Transit Card",
+  "content_in_root": false,
+  "render_readme": true,
+  "filename": "ttc-card.js",
+  "country": ["CA"],
+  "homeassistant": "2023.9.0",
+  "documentation": "https://github.com/KyhleOhlinger/lovelace-ttc-card",
+  "issues": "https://github.com/KyhleOhlinger/lovelace-ttc-card/issues"
+}
