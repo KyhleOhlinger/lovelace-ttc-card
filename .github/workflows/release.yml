@@ -5,21 +5,17 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Validate HACS
-        uses: hacs/action@main
-        with:
-          category: plugin
 
       - name: Get tag version
         id: tag
@@ -39,8 +35,8 @@ jobs:
             ## TTC Transit Card ${{ steps.tag.outputs.version }}
 
             ### Installation
-            Install via HACS by adding this repository as a custom repository
-            (category: Dashboard), or update automatically if already installed.
+            Install via HACS by adding `https://github.com/KyhleOhlinger/lovelace-ttc-card`
+            as a custom repository (category: Dashboard), or update automatically if already installed.
 
             ### Files
-            - `ttc-card.js` — the Lovelace card (place in `www/community/lovelace-ttc-card/`)
+            - `ttc-card.js` — the Lovelace card
