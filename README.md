@@ -1,4 +1,4 @@
-# lovelace-ttc-card
+# TTC Transit Card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/release/KyhleOhlinger/lovelace-ttc-card.svg)](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases)
@@ -8,21 +8,19 @@ A Home Assistant Lovelace card for Toronto commuters.
 
 **Live TTC subway map · Per-line service status · Route planner with filtered alerts**
 
----
+### What it does
 
-## What it does
-
-- Draws a full schematic TTC subway map (Line 1, Line 2, Line 4 Sheppard, Eglinton LRT)
+- Draws a full schematic TTC subway map with all 75 stations across Line 1, Line 2, Line 4 Sheppard, and Eglinton LRT
 - Colours each line based on live Home Assistant sensor states — yellow is normal, amber is delayed, red is a diversion
 - Pulses an overlay directly on the affected map segment when there's an alert
-- Route planner: pick any two of the 55 stations, and the card works out your route (including transfers) and filters the alerts panel to show only the lines you'll use
+- Route planner: pick any two stations and the card works out your route (including transfers) and filters the alerts panel to show only the lines you'll use
 - Fires push notifications via HA automations when a line status changes
 
 No API key required. Uses the public TTC live alerts feed at `alerts.ttc.ca`.
 
 ---
 
-## Installation
+## How to Install
 
 ### Via HACS (recommended)
 
@@ -32,7 +30,7 @@ No API key required. Uses the public TTC live alerts feed at `alerts.ttc.ca`.
 4. Search for **TTC Transit Card** and click **Install**
 5. Restart Home Assistant
 
-### Manual
+### Manual Installation
 
 1. Download `dist/ttc-card.js` from the [latest release](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases/latest)
 2. Copy to `config/www/ttc-card.js`
@@ -41,11 +39,16 @@ No API key required. Uses the public TTC live alerts feed at `alerts.ttc.ca`.
 
 ---
 
-## Sensor setup (required)
+## How to Use the HA Integration
 
-The card reads status from HA sensors you configure. Add the following to your `configuration.yaml` (or use the package approach — see below).
+The card reads status from Home Assistant sensors. You need to configure:
+1. A REST sensor that fetches live TTC alerts
+2. Template sensors to parse each line's status
+3. The Lovelace card itself
 
-### REST sensor (polls TTC live alerts API)
+### Step 1: Configure the REST Sensor
+
+Add the following to your `configuration.yaml` (or to a separate file using the packages approach — see below):
 
 ```yaml
 rest:
@@ -60,7 +63,9 @@ rest:
           - routes
 ```
 
-### Template sensors (one per line)
+### Step 2: Configure Template Sensors
+
+Add the following template sensors to parse the line statuses:
 
 ```yaml
 template:
@@ -180,32 +185,11 @@ template:
              | reject('eq','normal') | reject('eq','unknown') | list | length }}
 ```
 
-A full copy-paste-ready `configuration_ttc.yaml` is included in the [releases](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases/latest).
+**Tip:** A full copy-paste-ready `configuration_ttc.yaml` is included in the [releases](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases/latest).
 
----
+### Using the Packages Approach (Recommended)
 
-## Lovelace card configuration
-
-```yaml
-type: custom:ttc-transit-card
-entities:
-  line1:    sensor.ttc_line1_status
-  line2:    sensor.ttc_line2_status
-  line4:    sensor.ttc_line4_status
-  eglinton: sensor.ttc_eglinton_status
-  s504:     sensor.ttc_504_status
-  s29:      sensor.ttc_29_status
-  alerts:   sensor.ttc_alerts_raw
-  updated:  sensor.ttc_last_updated
-```
-
-All `entities` keys are optional — the defaults match the sensor names above. If you rename your sensors, update the keys here.
-
----
-
-## Using the packages approach (optional, recommended)
-
-Create `config/packages/ttc.yaml` and paste the full sensor YAML there. Then add to `configuration.yaml`:
+For easier maintenance, create `config/packages/ttc.yaml` and paste the full sensor YAML there. Then add to `configuration.yaml`:
 
 ```yaml
 homeassistant:
@@ -216,9 +200,65 @@ This keeps all TTC config isolated and easy to update.
 
 ---
 
-## Automations (optional)
+## How to Create a Dashboard
 
-Automations for push notifications when line status changes are included in `automations_ttc.yaml` in the [releases](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases/latest). Append to your `automations.yaml`.
+The card is designed to run in **panel mode** — a single full-screen view with the route planner bar pinned at the top and the map filling the remaining height.
+
+### Step 1 — Create a new dashboard
+
+1. In Home Assistant, go to **Settings → Dashboards**
+2. Click **Add Dashboard**
+3. Give it a title (e.g. `Transit`) and choose an icon (`mdi:subway-variant`)
+4. Click **Create**
+
+### Step 2 — Switch to panel mode and add the card
+
+1. Open the new dashboard and click the **pencil icon** (Edit)
+2. Click the **three-dot menu** → **Raw config editor**
+3. Replace the entire contents with the YAML below and click **Save**
+
+```yaml
+views:
+  - title: TTC
+    path: ttc
+    icon: mdi:subway-variant
+    type: panel
+    cards:
+      - type: custom:ttc-transit-card
+        entities:
+          line1:    sensor.ttc_line1_status
+          line2:    sensor.ttc_line2_status
+          line4:    sensor.ttc_line4_status
+          eglinton: sensor.ttc_eglinton_status
+          s504:     sensor.ttc_504_status
+          s29:      sensor.ttc_29_status
+          alerts:   sensor.ttc_alerts_raw
+          updated:  sensor.ttc_last_updated
+```
+
+> **Note on entity IDs:** If you created the template sensors via the HA Helpers UI (Settings → Helpers), Home Assistant automatically slugifies the names — `TTC Line 1 Status` becomes `sensor.ttc_line_1_status` (with underscores between each word). If you added them manually via `configuration.yaml` using the names in the sensor setup section above, the entity IDs will be `sensor.ttc_line1_status` (no extra underscores). Check **Developer Tools → States** and search for `ttc` to confirm the exact entity IDs on your instance, then update the YAML accordingly.
+
+### Step 3 — Verify
+
+After saving, the dashboard will appear in your sidebar. The card fills the entire screen:
+
+- **Top bar** — TTC branding, live update time, route planner dropdowns, refresh button
+- **Route summary strip** — appears below the top bar after you plan a route, showing your lines and any transfers
+- **Alerts panel** — slides in automatically when there are active alerts or when a route is planned, filtered to only your lines
+- **Map** — fills the remaining screen height; line colours update live from your sensors
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| Card shows "Custom element doesn't exist: ttc-transit-card" | The JS resource isn't registered. Go to Settings → Dashboards → Resources and confirm `/hacsfiles/lovelace-ttc-card/ttc-card.js` is listed. If not, reinstall via HACS. |
+| Map renders but all lines are grey | The template sensors exist but can't reach `sensor.ttc_alerts_raw`. Check that the REST sensor is configured in `configuration.yaml` and HA has been restarted. |
+| Sensors show `unknown` | The REST sensor hasn't pulled data yet. Go to Developer Tools → Services, call `homeassistant.update_entity` with `entity_id: sensor.ttc_alerts_raw`, then check the state again. |
+| Entity IDs don't match | Open Developer Tools → States and search `ttc` to find the exact IDs on your instance. Update the dashboard YAML to match. |
+
+### Optional: Set Up Push Notifications
+
+Automations for push notifications when line status changes are included in `automations_ttc.yaml` in the [releases](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases/latest). Append these to your `automations.yaml` to get alerted when service is disrupted.
 
 ---
 
@@ -247,12 +287,6 @@ lovelace-ttc-card/
 | Community RSS bridge | `https://liventnick.github.io/TTC-Alerts-RSS/ttc_feed.xml` | Backup |
 
 No API key required.
-
----
-
-## Publishing to the default HACS store
-
-To be included in the default HACS store (so anyone can find it without adding a custom repo), submit a pull request to [hacs/default](https://github.com/hacs/default) following their [inclusion requirements](https://hacs.xyz/docs/publish/include/). Your repo must have at least one GitHub release and pass HACS validation.
 
 ---
 

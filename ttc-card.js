@@ -9,7 +9,7 @@
  * License: MIT
  */
 
-const CARD_VERSION = "1.0.0";
+const CARD_VERSION = "1.1.0";
 
 /* ─────────────────────────────────────────────
    DATA: stations, line colours, alert mapping
@@ -18,65 +18,125 @@ const LINE_COLORS = {
   1: "#F9BC1B",
   2: "#009E60",
   4: "#C0392B",
-  eg: "#9B59B6",
+  eg: "#F4731C",
+  fw: "#A8A8A8",
 };
 
 const STATIONS = [
-  { id: "vaughan",       name: "Vaughan MC",           lines: [1],      x: 175, y: 18  },
-  { id: "hwy407",        name: "Highway 407",           lines: [1],      x: 175, y: 34  },
-  { id: "pioneer",       name: "Pioneer Village",       lines: [1],      x: 175, y: 50  },
-  { id: "yorku",         name: "York University",       lines: [1],      x: 175, y: 66  },
-  { id: "finchw",        name: "Finch West",            lines: [1],      x: 175, y: 82  },
-  { id: "downsview",     name: "Downsview Park",        lines: [1],      x: 175, y: 98  },
-  { id: "sheppardw",     name: "Sheppard West",         lines: [1],      x: 175, y: 114 },
-  { id: "wilson",        name: "Wilson",                lines: [1],      x: 175, y: 130 },
-  { id: "yorkdale",      name: "Yorkdale",              lines: [1],      x: 175, y: 146 },
-  { id: "spadina",       name: "Spadina",               lines: [1, 2],   x: 175, y: 165 },
-  { id: "stgeorge",      name: "St George",             lines: [1, 2],   x: 230, y: 165 },
-  { id: "blooryonge",    name: "Bloor–Yonge",           lines: [1, 2],   x: 315, y: 165 },
-  { id: "rosedale",      name: "Rosedale",              lines: [1],      x: 315, y: 146 },
-  { id: "summerhill",    name: "Summerhill",            lines: [1],      x: 315, y: 130 },
-  { id: "stclair",       name: "St Clair",              lines: [1],      x: 315, y: 114 },
-  { id: "davisville",    name: "Davisville",            lines: [1],      x: 315, y: 98  },
-  { id: "eglinton",      name: "Eglinton",              lines: [1],      x: 315, y: 82  },
-  { id: "lawrence",      name: "Lawrence",              lines: [1],      x: 315, y: 66  },
-  { id: "yorkmills",     name: "York Mills",            lines: [1],      x: 315, y: 50  },
-  { id: "northy",        name: "North York Centre",     lines: [1],      x: 315, y: 34  },
-  { id: "finchy",        name: "Finch",                 lines: [1],      x: 315, y: 18  },
-  { id: "sheppardyonge", name: "Sheppard–Yonge",        lines: [1, 4],   x: 315, y: 58  },
-  { id: "queenspark",    name: "Queens Park",           lines: [1],      x: 315, y: 181 },
-  { id: "college",       name: "College",               lines: [1],      x: 315, y: 197 },
-  { id: "union",         name: "Union",                 lines: [1],      x: 250, y: 205 },
-  { id: "osgoode",       name: "Osgoode",               lines: [1],      x: 225, y: 205 },
-  { id: "standrew",      name: "St Andrew",             lines: [1],      x: 200, y: 205 },
-  { id: "kipling",       name: "Kipling",               lines: [2],      x: 18,  y: 165 },
-  { id: "islington",     name: "Islington",             lines: [2],      x: 50,  y: 165 },
-  { id: "royal-york",    name: "Royal York",            lines: [2],      x: 82,  y: 165 },
-  { id: "old-mill",      name: "Old Mill",              lines: [2],      x: 110, y: 165 },
-  { id: "jane",          name: "Jane",                  lines: [2],      x: 136, y: 165 },
-  { id: "bay",           name: "Bay",                   lines: [2],      x: 263, y: 165 },
-  { id: "sherbourne",    name: "Sherbourne",            lines: [2],      x: 355, y: 165 },
-  { id: "castle-frank",  name: "Castle Frank",          lines: [2],      x: 393, y: 165 },
-  { id: "broadview",     name: "Broadview",             lines: [2],      x: 428, y: 165 },
-  { id: "chester",       name: "Chester",               lines: [2],      x: 460, y: 165 },
-  { id: "pape",          name: "Pape",                  lines: [2],      x: 490, y: 165 },
-  { id: "donlands",      name: "Donlands",              lines: [2],      x: 520, y: 165 },
-  { id: "greenwood",     name: "Greenwood",             lines: [2],      x: 550, y: 165 },
-  { id: "coxwell",       name: "Coxwell",               lines: [2],      x: 578, y: 165 },
-  { id: "kennedy",       name: "Kennedy",               lines: [2],      x: 602, y: 165 },
-  { id: "bayview",       name: "Bayview",               lines: [4],      x: 358, y: 58  },
-  { id: "bessarion",     name: "Bessarion",             lines: [4],      x: 400, y: 58  },
-  { id: "leslie",        name: "Leslie",                lines: [4],      x: 445, y: 58  },
-  { id: "donmills",      name: "Don Mills",             lines: [4],      x: 490, y: 58  },
-  { id: "eg-mount-dennis", name: "Mount Dennis (LRT)", lines: ["eg"],   x: 18,  y: 240 },
-  { id: "eg-keelesdale",   name: "Keelesdale (LRT)",   lines: ["eg"],   x: 100, y: 240 },
-  { id: "eg-eglintonw",    name: "Eglinton West (LRT)",lines: [1,"eg"], x: 175, y: 240 },
-  { id: "eg-avenue",       name: "Avenue (LRT)",        lines: ["eg"],   x: 245, y: 240 },
-  { id: "eg-eglinton",     name: "Eglinton (LRT)",      lines: [1,"eg"], x: 315, y: 240 },
-  { id: "eg-leaside",      name: "Leaside (LRT)",       lines: ["eg"],   x: 393, y: 240 },
-  { id: "eg-science",      name: "Science Centre (LRT)",lines: ["eg"],   x: 490, y: 240 },
-  { id: "eg-ionview",      name: "Ionview (LRT)",       lines: ["eg"],   x: 560, y: 240 },
-  { id: "eg-kennedy",      name: "Kennedy (LRT)",       lines: ["eg"],   x: 602, y: 240 },
+  // ── LINE 1 YONGE LEG (x=420, vertical y=30→332) ────────────────────────
+  { id:"finchy",        name:"Finch",               lines:[1],     x:420, y:30  },
+  { id:"northy",        name:"North York Centre",   lines:[1],     x:420, y:52  },
+  { id:"sheppardyonge", name:"Sheppard–Yonge",      lines:[1,4],   x:420, y:80  },
+  { id:"yorkmills",     name:"York Mills",           lines:[1],     x:420, y:108 },
+  { id:"lawrence",      name:"Lawrence",             lines:[1],     x:420, y:130 },
+  { id:"eglinton",      name:"Eglinton",             lines:[1,"eg"],x:420, y:180 },
+  { id:"davisville",    name:"Davisville",           lines:[1],     x:420, y:200 },
+  { id:"stclair",       name:"St Clair",             lines:[1],     x:420, y:216 },
+  { id:"summerhill",    name:"Summerhill",           lines:[1],     x:420, y:230 },
+  { id:"rosedale",      name:"Rosedale",             lines:[1],     x:420, y:244 },
+  { id:"blooryonge",    name:"Bloor–Yonge",          lines:[1,2],   x:420, y:260 },
+  { id:"wellesley",     name:"Wellesley",            lines:[1],     x:420, y:276 },
+  { id:"college",       name:"College",              lines:[1],     x:420, y:290 },
+  { id:"tmu",           name:"TMU",                  lines:[1],     x:420, y:304 },
+  { id:"queen",         name:"Queen",                lines:[1],     x:420, y:318 },
+  { id:"king",          name:"King",                 lines:[1],     x:420, y:332 },
+
+  // ── LINE 1 U-BASE (y=375, x=270→420) ──────────────────────────────────
+  { id:"osgoode",       name:"Osgoode",              lines:[1],     x:294, y:375 },
+  { id:"standrew",      name:"St Andrew",            lines:[1],     x:330, y:375 },
+  { id:"union",         name:"Union",                lines:[1],     x:366, y:375 },
+
+  // ── LINE 1 UNIVERSITY LEG (x=270, vertical y=120→332) ─────────────────
+  { id:"finchw",        name:"Finch West",           lines:[1,"fw"],x:270, y:120 },
+  { id:"downsview",     name:"Downsview Park",       lines:[1],     x:270, y:130 },
+  { id:"sheppardw",     name:"Sheppard West",        lines:[1],     x:270, y:140 },
+  { id:"wilson",        name:"Wilson",               lines:[1],     x:270, y:150 },
+  { id:"yorkdale",      name:"Yorkdale",             lines:[1],     x:270, y:160 },
+  { id:"lawrencew",     name:"Lawrence West",        lines:[1],     x:270, y:170 },
+  { id:"glencairn",     name:"Glencairn",            lines:[1],     x:270, y:178 },
+  { id:"eglintonw",     name:"Eglinton West",        lines:[1,"eg"],x:270, y:180 },
+  { id:"stclairw",      name:"St Clair West",        lines:[1],     x:270, y:200 },
+  { id:"dupont",        name:"Dupont",               lines:[1],     x:270, y:218 },
+  { id:"spadina",       name:"Spadina",              lines:[1,2],   x:270, y:260 },
+  { id:"college2",      name:"College",              lines:[1],     x:270, y:276 },
+  { id:"dundasw",       name:"Dundas",               lines:[1],     x:270, y:290 },
+  { id:"stpatrick",     name:"St Patrick",           lines:[1],     x:270, y:304 },
+  { id:"museum",        name:"Museum",               lines:[1],     x:270, y:318 },
+  { id:"queenspark",    name:"Queen's Park",         lines:[1],     x:270, y:332 },
+
+  // ── LINE 1 VAUGHAN DIAGONAL (270,120) → (90,30), 3 intermediate stops ──
+  // Each stop evenly spaced along the diagonal
+  { id:"yorku",         name:"York University",      lines:[1],     x:225, y:98  },
+  { id:"pioneer",       name:"Pioneer Village",      lines:[1],     x:180, y:75  },
+  { id:"hwy407",        name:"Highway 407",          lines:[1],     x:135, y:52  },
+  { id:"vaughan",       name:"Vaughan MC",           lines:[1],     x:90,  y:30  },
+
+  // ── LINE 2 BLOOR-DANFORTH (y=260, x=30→650) ───────────────────────────
+  { id:"kipling",       name:"Kipling",              lines:[2],     x:30,  y:260 },
+  { id:"islington",     name:"Islington",            lines:[2],     x:47,  y:260 },
+  { id:"royal-york",    name:"Royal York",           lines:[2],     x:64,  y:260 },
+  { id:"old-mill",      name:"Old Mill",             lines:[2],     x:81,  y:260 },
+  { id:"jane",          name:"Jane",                 lines:[2],     x:98,  y:260 },
+  { id:"runnymede",     name:"Runnymede",            lines:[2],     x:113, y:260 },
+  { id:"high-park",     name:"High Park",            lines:[2],     x:126, y:260 },
+  { id:"keele",         name:"Keele",                lines:[2],     x:138, y:260 },
+  { id:"dundas-west",   name:"Dundas West",          lines:[2],     x:149, y:260 },
+  { id:"lansdowne",     name:"Lansdowne",            lines:[2],     x:160, y:260 },
+  { id:"dufferin",      name:"Dufferin",             lines:[2],     x:170, y:260 },
+  { id:"ossington",     name:"Ossington",            lines:[2],     x:179, y:260 },
+  { id:"christie",      name:"Christie",             lines:[2],     x:188, y:260 },
+  { id:"bathurst",      name:"Bathurst",             lines:[2],     x:222, y:260 },
+  { id:"stgeorge",      name:"St George",            lines:[1,2],   x:336, y:260 },
+  { id:"bay",           name:"Bay",                  lines:[2],     x:380, y:260 },
+  { id:"sherbourne",    name:"Sherbourne",           lines:[2],     x:447, y:260 },
+  { id:"castle-frank",  name:"Castle Frank",         lines:[2],     x:464, y:260 },
+  { id:"broadview",     name:"Broadview",            lines:[2],     x:480, y:260 },
+  { id:"chester",       name:"Chester",              lines:[2],     x:496, y:260 },
+  { id:"pape",          name:"Pape",                 lines:[2],     x:511, y:260 },
+  { id:"donlands",      name:"Donlands",             lines:[2],     x:526, y:260 },
+  { id:"greenwood",     name:"Greenwood",            lines:[2],     x:540, y:260 },
+  { id:"coxwell",       name:"Coxwell",              lines:[2],     x:554, y:260 },
+  { id:"woodbine",      name:"Woodbine",             lines:[2],     x:567, y:260 },
+  { id:"main-street",   name:"Main Street",          lines:[2],     x:580, y:260 },
+  { id:"victoria-park", name:"Victoria Park",        lines:[2],     x:593, y:260 },
+  { id:"warden",        name:"Warden",               lines:[2],     x:610, y:260 },
+  { id:"kennedy",       name:"Kennedy",              lines:[2],     x:635, y:260 },
+
+  // ── LINE 4 SHEPPARD (y=80, x=420→558) ─────────────────────────────────
+  { id:"bayview",       name:"Bayview",              lines:[4],     x:450, y:80  },
+  { id:"bessarion",     name:"Bessarion",            lines:[4],     x:486, y:80  },
+  { id:"leslie",        name:"Leslie",               lines:[4],     x:522, y:80  },
+  { id:"donmills",      name:"Don Mills",            lines:[4],     x:558, y:80  },
+
+  // ── LINE 5 EGLINTON LRT (y=180, x=30→620) ─────────────────────────────
+  { id:"eg-mount-dennis",  name:"Mount Dennis",      lines:["eg"],  x:30,  y:180 },
+  { id:"eg-keelesdale",    name:"Keelesdale",        lines:["eg"],  x:65,  y:180 },
+  { id:"eg-caledonia",     name:"Caledonia",         lines:["eg"],  x:98,  y:180 },
+  { id:"eg-dufferin-lrt",  name:"Dufferin",          lines:["eg"],  x:130, y:180 },
+  { id:"eg-fairbank",      name:"Fairbank",          lines:["eg"],  x:162, y:180 },
+  { id:"eg-keel",          name:"Keel",              lines:["eg"],  x:192, y:180 },
+  { id:"eg-cedarvale",     name:"Cedarvale",         lines:["eg"],  x:228, y:180 },
+  { id:"eg-forest-hill",   name:"Forest Hill",       lines:["eg"],  x:302, y:180 },
+  { id:"eg-chaplin",       name:"Chaplin",           lines:["eg"],  x:334, y:180 },
+  { id:"eg-avenue",        name:"Avenue",            lines:["eg"],  x:366, y:180 },
+  { id:"eg-midtown",       name:"Midtown",           lines:["eg"],  x:396, y:180 },
+  { id:"eg-leaside",       name:"Leaside",           lines:["eg"],  x:452, y:180 },
+  { id:"eg-laird",         name:"Laird",             lines:["eg"],  x:482, y:180 },
+  { id:"eg-science",       name:"Science Centre",    lines:["eg"],  x:512, y:180 },
+  { id:"eg-fairview",      name:"Fairview",          lines:["eg"],  x:540, y:180 },
+  { id:"eg-ionview",       name:"Ionview",           lines:["eg"],  x:568, y:180 },
+  { id:"eg-kennedy",       name:"Kennedy LRT",       lines:["eg"],  x:600, y:180 },
+
+  // ── LINE 6 FINCH WEST LRT (y=120, x=30→270) ───────────────────────────
+  { id:"fw-humber",        name:"Humber College",    lines:["fw"],  x:30,  y:120 },
+  { id:"fw-habitant",      name:"Habitant",          lines:["fw"],  x:58,  y:120 },
+  { id:"fw-dufferin-fw",   name:"Dufferin & Finch",  lines:["fw"],  x:84,  y:120 },
+  { id:"fw-driftwood",     name:"Driftwood",         lines:["fw"],  x:108, y:120 },
+  { id:"fw-jane-finch",    name:"Jane & Finch",      lines:["fw"],  x:132, y:120 },
+  { id:"fw-sentinel",      name:"Sentinel",          lines:["fw"],  x:158, y:120 },
+  { id:"fw-york-gate",     name:"York Gate",         lines:["fw"],  x:186, y:120 },
+  { id:"fw-norfinch",      name:"Norfinch Oakdale",  lines:["fw"],  x:214, y:120 },
+  { id:"fw-keele",         name:"Keele & Finch",     lines:["fw"],  x:242, y:120 },
 ];
 
 /* ─────────────────────────────────────────────
@@ -101,7 +161,7 @@ function findRoute(fromId, toId) {
 
 function lineName(l) {
   return (
-    { 1: "Line 1 Yonge–University", 2: "Line 2 Bloor–Danforth", 4: "Line 4 Sheppard", eg: "Eglinton LRT" }[l] || "Transit"
+    { 1: "Line 1 Yonge–University", 2: "Line 2 Bloor–Danforth", 4: "Line 4 Sheppard", eg: "Line 5 Eglinton LRT", fw: "Line 6 Finch West LRT" }[l] || "Transit"
   );
 }
 
@@ -150,15 +210,24 @@ function getAlertDesc(hass, entityId) {
 }
 
 /* ─────────────────────────────────────────────
-   SVG MAP BUILDER
+   SVG MAP BUILDER — matches reference screenshot
+   viewBox: 0 0 680 420
+   Yonge leg:       x=420, y=30 (Finch) → y=332 (King) → U-corner
+   University leg:  x=270, y=120 (Finch West) → y=332 → U-corner
+   Vaughan diagonal: (90,30) → (270,120)  [NW to SE]
+   U-base:          y=375, x=270 → x=420
+   Line 2:          y=260 horizontal
+   Line 5 Eglinton: y=180 horizontal (continuous through both legs)
+   Line 6 Finch W:  y=120 horizontal west of Finch West (x=30 → x=270)
+   Line 4 Sheppard: y=80 horizontal east of Sheppard-Yonge (x=420 → x=570)
 ───────────────────────────────────────────── */
 function buildMap(l1c, l2c, l4c, egc, l1s, l2s, egS) {
+  const fwc = LINE_COLORS.fw;
   const ns = "http://www.w3.org/2000/svg";
-
   const svg = document.createElementNS(ns, "svg");
   svg.setAttribute("id", "ttc-svg");
-  svg.setAttribute("viewBox", "0 0 620 310");
-  svg.style.cssText = "width:100%;height:auto;display:block";
+  svg.setAttribute("viewBox", "0 0 680 420");
+  svg.style.cssText = "width:100%;height:100%;display:block;background:#111318";
 
   function el(tag, attrs) {
     const e = document.createElementNS(ns, tag);
@@ -166,124 +235,122 @@ function buildMap(l1c, l2c, l4c, egc, l1s, l2s, egS) {
     return e;
   }
   function txt(content, attrs) {
-    const t = el("text", attrs);
+    const t = el("text", { "font-family":"sans-serif", fill:"#bbb", ...attrs });
     t.textContent = content;
     return t;
   }
+  function stn(cx, cy, r, stroke, sw) {
+    return el("circle", { cx, cy, r, fill:"#111318", stroke, "stroke-width":sw });
+  }
+  function ic(cx, cy, dot, r=9) {
+    svg.appendChild(el("circle", { cx, cy, r, fill:"#111318", stroke:"#999", "stroke-width":2.5 }));
+    svg.appendChild(el("circle", { cx, cy, r:r*0.42, fill:dot }));
+  }
 
-  /* Lines */
-  svg.appendChild(el("line",     { x1:18,   y1:165, x2:602, y2:165, stroke:l2c, "stroke-width":7, "stroke-linecap":"round" }));
-  svg.appendChild(el("polyline", { points:"175,18 175,165",          fill:"none", stroke:l1c, "stroke-width":7, "stroke-linecap":"round", "stroke-linejoin":"round" }));
-  svg.appendChild(el("polyline", { points:"175,165 175,205 250,205 315,205", fill:"none", stroke:l1c, "stroke-width":7, "stroke-linecap":"round", "stroke-linejoin":"round" }));
-  svg.appendChild(el("polyline", { points:"315,205 315,165 315,18", fill:"none", stroke:l1c, "stroke-width":7, "stroke-linecap":"round", "stroke-linejoin":"round" }));
-  svg.appendChild(el("line",     { x1:315,  y1:58,  x2:490, y2:58,  stroke:l4c, "stroke-width":7, "stroke-linecap":"round" }));
-  svg.appendChild(el("line",     { x1:18,   y1:240, x2:602, y2:240, stroke:egc, "stroke-width":5, "stroke-linecap":"round", "stroke-dasharray":"10,5" }));
+  const LW = 8;
 
-  /* Status overlays */
+  // ── LINE 6 FINCH WEST LRT (grey, y=120, horizontal west of Finch West) ─
+  svg.appendChild(el("line", { x1:30, y1:120, x2:270, y2:120,
+    stroke:fwc, "stroke-width":6, "stroke-linecap":"round" }));
+
+  // ── LINE 5 EGLINTON (orange, y=180, continuous through both legs) ───────
+  svg.appendChild(el("line", { x1:30, y1:180, x2:620, y2:180,
+    stroke:egc, "stroke-width":7, "stroke-linecap":"round" }));
+
+  // ── LINE 2 BLOOR-DANFORTH (green, y=260, continuous) ────────────────────
+  svg.appendChild(el("line", { x1:30, y1:260, x2:650, y2:260,
+    stroke:l2c, "stroke-width":LW, "stroke-linecap":"round" }));
+
+  // ── LINE 1 VAUGHAN DIAGONAL (from Vaughan 90,30 → Finch West 270,120) ──
+  svg.appendChild(el("line", { x1:90, y1:30, x2:270, y2:120,
+    stroke:l1c, "stroke-width":LW, "stroke-linecap":"round" }));
+
+  // ── LINE 1 MAIN U (University leg + U-base + Yonge leg) ─────────────────
+  // University leg: Finch West (270,120) straight south to U-corner
+  // U-base: across to Yonge corner
+  // Yonge leg: straight north to Finch (420,30)
+  svg.appendChild(el("path", {
+    d:"M270,120 L270,352 Q270,375 294,375 L396,375 Q420,375 420,352 L420,30",
+    fill:"none", stroke:l1c, "stroke-width":LW,
+    "stroke-linecap":"round", "stroke-linejoin":"round"
+  }));
+
+  // ── LINE 4 SHEPPARD (dark red, y=80, east of Sheppard-Yonge) ────────────
+  svg.appendChild(el("line", { x1:420, y1:80, x2:570, y2:80,
+    stroke:l4c, "stroke-width":LW, "stroke-linecap":"round" }));
+
+  // ── STATUS OVERLAYS ───────────────────────────────────────────────────────
   if (l2s !== "normal" && l2s !== "unknown") {
-    const ov = el("rect", { x:18, y:158, width:587, height:14, rx:3, fill: l2s === "diversion" ? "#C0392B" : "#F9BC1B", "fill-opacity":0.18 });
-    ov.id = "ov-l2";
-    svg.appendChild(ov);
+    svg.appendChild(el("rect", { x:30, y:253, width:620, height:14, rx:4,
+      fill: l2s === "diversion" ? "#C0392B" : "#F9BC1B", "fill-opacity":0.25, id:"ov-l2" }));
   }
   if (l1s !== "normal" && l1s !== "unknown") {
-    svg.appendChild(el("rect", { x:168, y:18, width:14, height:147, rx:3, fill:"#F9BC1B", "fill-opacity":0.22 }));
-    svg.appendChild(el("rect", { x:308, y:18, width:14, height:147, rx:3, fill:"#F9BC1B", "fill-opacity":0.22 }));
+    svg.appendChild(el("rect", { x:262, y:120, width:16, height:255, rx:4, fill:"#F9BC1B", "fill-opacity":0.22 }));
+    svg.appendChild(el("rect", { x:412, y:30,  width:16, height:322, rx:4, fill:"#F9BC1B", "fill-opacity":0.22 }));
   }
   if (egS !== "normal" && egS !== "unknown") {
-    svg.appendChild(el("rect", { x:18, y:234, width:587, height:12, rx:3, fill:"#EF9F27", "fill-opacity":0.18 }));
+    svg.appendChild(el("rect", { x:30, y:173, width:590, height:14, rx:4, fill:"#EF9F27", "fill-opacity":0.22 }));
   }
 
-  /* Route overlay group (JS-controlled) */
+  // ── ROUTE OVERLAY ────────────────────────────────────────────────────────
   const rog = document.createElementNS(ns, "g");
   rog.id = "ttc-route-overlay";
   rog.style.opacity = "0";
   svg.appendChild(rog);
 
-  /* Stations */
-  function stn(cx, cy, r, stroke, fill = "#fff", sw = 2) {
-    return el("circle", { cx, cy, r, fill, stroke, "stroke-width": sw });
-  }
-  function interchange(cx, cy, dotFill) {
-    svg.appendChild(stn(cx, cy, 8, "#888", "#fff", 2));
-    svg.appendChild(el("circle", { cx, cy, r: 3.5, fill: dotFill }));
-  }
+  // ── INTERCHANGES ─────────────────────────────────────────────────────────
+  ic(270, 120, l1c);           // Finch West  L1+L6
+  ic(270, 180, l1c);           // Eglinton West L1+L5
+  ic(420, 180, l1c);           // Eglinton L1+L5
+  ic(270, 260, l1c);           // Spadina L1+L2
+  ic(336, 260, l2c);           // St George L1+L2
+  svg.appendChild(el("circle", { cx:420, cy:260, r:11, fill:"#111318", stroke:"#999", "stroke-width":3 }));
+  svg.appendChild(el("circle", { cx:420, cy:260, r:5, fill:l2c }));  // Bloor-Yonge
+  ic(420, 80,  l4c);           // Sheppard-Yonge L1+L4
 
-  /* Line 1 west */
-  [18,34,50,66,82,98,114,130,146].forEach((y,i) =>
-    svg.appendChild(stn(175, y, i===0?5:3.5, l1c, "#fff", i===0?2.5:2))
-  );
-  interchange(175, 165, l1c);
+  // ── REGULAR STATIONS ─────────────────────────────────────────────────────
+  STATIONS.forEach(s => {
+    if (s.lines.length > 1) return;
+    const col = s.lines[0] === 1 ? l1c
+              : s.lines[0] === 2 ? l2c
+              : s.lines[0] === 4 ? l4c
+              : s.lines[0] === "fw" ? fwc : egc;
+    const term = ["vaughan","finchy","kipling","kennedy","donmills","eg-mount-dennis","eg-kennedy","fw-humber"].includes(s.id);
+    svg.appendChild(stn(s.x, s.y, term ? 5 : 3.5, col, term ? 2.5 : 1.8));
+  });
 
-  /* Line 1 east */
-  [18,34,50,66,82,98,114,130,146].forEach((y,i) =>
-    svg.appendChild(stn(315, y, i===0?5:3.5, l1c, "#fff", i===0?2.5:2))
-  );
-  svg.appendChild(stn(315, 181, 3.5, l1c));
-  svg.appendChild(stn(315, 197, 3.5, l1c));
-
-  /* Bloor-Yonge interchange */
-  svg.appendChild(stn(315, 165, 9, "#888", "#fff", 2.5));
-  svg.appendChild(el("circle", { cx:315, cy:165, r:4, fill:l2c }));
-
-  /* Union */
-  interchange(250, 205, l1c);
-  svg.appendChild(stn(225, 205, 3.5, l1c));
-  svg.appendChild(stn(200, 205, 3.5, l1c));
-
-  /* Line 2 */
-  [[18,4.5],[50,3.5],[82,3.5],[110,3.5],[136,3.5]].forEach(([x,r]) => svg.appendChild(stn(x,165,r,l2c)));
-  interchange(230, 165, "#888");
-  svg.appendChild(stn(263, 165, 3.5, l2c));
-  [355,393,428,460,490,520,550].forEach(x => svg.appendChild(stn(x,165,3.5,l2c)));
-  svg.appendChild(stn(578, 165, 4, l2c));
-  svg.appendChild(stn(602, 165, 4.5, l2c));
-
-  /* Line 4 */
-  svg.appendChild(stn(315, 58, 7, "#888", "#fff", 2));
-  svg.appendChild(el("circle", { cx:315, cy:58, r:3, fill:l4c }));
-  [358,400,445].forEach(x => svg.appendChild(stn(x,58,3.5,l4c)));
-  svg.appendChild(stn(490, 58, 4.5, l4c, "#fff", 2.5));
-
-  /* Eglinton LRT */
-  [18,100].forEach(x => svg.appendChild(stn(x,240,3.5,egc,"#fff",1.5)));
-  svg.appendChild(stn(175, 240, 6, "#888", "#fff", 1.5));
-  svg.appendChild(el("circle", { cx:175, cy:240, r:2.5, fill:egc }));
-  svg.appendChild(stn(245, 240, 3.5, egc, "#fff", 1.5));
-  svg.appendChild(stn(315, 240, 6, "#888", "#fff", 1.5));
-  svg.appendChild(el("circle", { cx:315, cy:240, r:2.5, fill:egc }));
-  [393,490,560,602].forEach(x => svg.appendChild(stn(x,240,3.5,egc,"#fff",1.5)));
-
-  /* Status warning labels */
-  if (l2s === "delays")    svg.appendChild(txt("⚠ Delays",    { x:458, y:155, "text-anchor":"middle", "font-size":9, fill:"#F9BC1B", "font-weight":"bold" }));
-  if (l2s === "diversion") svg.appendChild(txt("✕ Diversion", { x:458, y:155, "text-anchor":"middle", "font-size":9, fill:"#C0392B", "font-weight":"bold" }));
-  if (l2s === "suspended") svg.appendChild(txt("⊘ Suspended", { x:458, y:155, "text-anchor":"middle", "font-size":9, fill:"#888",    "font-weight":"bold" }));
+  // ── STATUS LABELS ─────────────────────────────────────────────────────────
+  if (l2s === "delays")    svg.appendChild(txt("⚠ Delays",    { x:560, y:250, "text-anchor":"middle", "font-size":8, fill:"#F9BC1B", "font-weight":"bold" }));
+  if (l2s === "diversion") svg.appendChild(txt("✕ Diversion", { x:560, y:250, "text-anchor":"middle", "font-size":8, fill:"#C0392B", "font-weight":"bold" }));
   if (l1s !== "normal" && l1s !== "unknown")
-    svg.appendChild(txt("⚠", { x:155, y:90, "text-anchor":"end", "font-size":10, fill:"#EF9F27", "font-weight":"bold" }));
+    svg.appendChild(txt("⚠", { x:435, y:200, "font-size":10, fill:"#EF9F27", "font-weight":"bold" }));
   if (egS !== "normal" && egS !== "unknown")
-    svg.appendChild(txt("⚠ Slow zone", { x:310, y:258, "text-anchor":"middle", "font-size":8, fill:"#EF9F27", "font-weight":"bold" }));
+    svg.appendChild(txt("⚠", { x:500, y:170, "font-size":10, fill:"#EF9F27", "font-weight":"bold" }));
 
-  /* Labels */
-  const labels = [
-    ["Vaughan MC",    175,  12, "middle"],
-    ["Finch",         315,  12, "middle"],
-    ["Spadina",       161, 173, "end"],
-    ["Union",         237, 218, "middle"],
-    ["Bloor–Yonge",   322, 178, "start"],
-    ["Kipling",        14, 159, "start"],
-    ["Kennedy",       606, 159, "start"],
-    ["Don Mills",     495,  52, "start"],
-    ["Eglinton (W)",  178, 252, "start"],
-    ["Eglinton",      319, 252, "start"],
-  ];
-  labels.forEach(([t,x,y,a]) => svg.appendChild(txt(t, { x, y, "text-anchor":a, "font-size":8, fill:"#888" })));
-
-  const lineLabels = [
-    ["Line 1", 175, 108, l1c],
-    ["Line 2",  58, 157, l2c],
-    ["Line 4", 378,  50, l4c],
-    ["Eglinton LRT", 258, 232, egc],
-  ];
-  lineLabels.forEach(([t,x,y,fill]) => svg.appendChild(txt(t, { x, y, "font-size":8, fill, "font-weight":"500" })));
+  // ── LABELS ────────────────────────────────────────────────────────────────
+  [
+    ["Vaughan MC",      90,  20, "middle", "#ccc",   false],
+    ["Finch West",     270, 110, "middle", "#ccc",   false],
+    ["Finch",          420,  20, "middle", "#ccc",   false],
+    ["Humber College",  30, 110, "middle", "#ccc",   false],
+    ["Kipling",         30, 252, "middle", "#ccc",   false],
+    ["Kennedy",        650, 252, "middle", "#ccc",   false],
+    ["Don Mills",      558,  68, "middle", "#ccc",   false],
+    ["Mt Dennis",       30, 170, "middle", "#ccc",   false],
+    ["Spadina",        256, 265, "end",    "#ccc",   false],
+    ["St George",      336, 250, "middle", "#ccc",   false],
+    ["Bloor–Yonge",    436, 265, "start",  "#ccc",   false],
+    ["Sheppard–Yonge", 436,  83, "start",  "#ccc",   false],
+    ["Union",          344, 390, "middle", "#ccc",   false],
+    ["Line 1",         285, 200, "start",  l1c,      true],
+    ["Line 2",          65, 252, "start",  l2c,      true],
+    ["Line 4",         455,  68, "start",  l4c,      true],
+    ["Line 5",         200, 170, "start",  egc,      true],
+    ["Line 6",         148, 110, "middle", fwc,      true],
+  ].forEach(([t,x,y,a,fill,bold]) =>
+    svg.appendChild(txt(t, { x, y, "text-anchor":a, "font-size":9, fill,
+      ...(bold ? { "font-weight":"600" } : {}) }))
+  );
 
   return svg;
 }
@@ -340,164 +407,152 @@ class TtcTransitCard extends HTMLElement {
 
     const style = document.createElement("style");
     style.textContent = `
-      :host { display: block; }
+      :host { display: flex; flex-direction: column; width: 100%; height: calc(100vh - 120px); min-height: 500px; }
       * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--primary-font-family, sans-serif); }
-      .root { display: grid; grid-template-columns: 1fr 290px; gap: 12px; }
-      @media (max-width: 680px) { .root { grid-template-columns: 1fr; } }
-      .card { background: var(--card-background-color, #fff); border: 1px solid var(--divider-color, #e0e0e0); border-radius: 12px; overflow: hidden; }
-      .card-hd { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid var(--divider-color, #e0e0e0); }
-      .card-hd-l { display: flex; align-items: center; gap: 9px; }
+
+      /* ── TOP BAR: route planner ── */
+      .top-bar { background: var(--card-background-color, #fff); border: 1px solid var(--divider-color, #e0e0e0); border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex-shrink: 0; margin-bottom: 8px; }
+      .top-bar-title { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
       .ht { font-size: 14px; font-weight: 500; color: var(--primary-text-color); }
-      .hs { font-size: 11px; color: var(--secondary-text-color); margin-top: 1px; }
-      .map-wrap { background: #0d0f12; padding: 10px; }
-      .legend { display: flex; gap: 12px; padding: 7px 12px; border-bottom: 1px solid var(--divider-color, #e0e0e0); flex-wrap: wrap; }
-      .li { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--secondary-text-color); }
-      .ld { width: 18px; height: 6px; border-radius: 3px; }
-      .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--divider-color, #e0e0e0); }
-      .stat { background: var(--secondary-background-color, #f5f5f5); border-radius: 8px; padding: 8px 10px; text-align: center; }
-      .stat-n { font-size: 20px; font-weight: 500; }
-      .stat-l { font-size: 10px; color: var(--secondary-text-color); margin-top: 2px; }
-      .right-col { display: flex; flex-direction: column; gap: 12px; }
-      .rp { padding: 12px 14px; border-bottom: 1px solid var(--divider-color, #e0e0e0); }
-      .rp-row { display: grid; grid-template-columns: 1fr 32px 1fr; gap: 8px; align-items: end; }
-      .fl { font-size: 11px; color: var(--secondary-text-color); margin-bottom: 4px; }
+      .hs { font-size: 11px; color: var(--secondary-text-color); }
+      .rp-row { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; flex-wrap: wrap; }
+      .fl { font-size: 10px; color: var(--secondary-text-color); margin-bottom: 3px; }
+      .sel-wrap { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
       select { width: 100%; font-size: 12px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--divider-color, #ccc); background: var(--secondary-background-color, #f5f5f5); color: var(--primary-text-color); cursor: pointer; }
-      .swap-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--divider-color, #ccc); background: var(--secondary-background-color, #f5f5f5); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--secondary-text-color); }
-      .route-btn { width: 100%; margin-top: 10px; padding: 8px; font-size: 12px; font-weight: 500; border-radius: 8px; border: 1px solid var(--divider-color, #ccc); background: var(--secondary-background-color, #f5f5f5); color: var(--primary-text-color); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+      .swap-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--divider-color, #ccc); background: var(--secondary-background-color, #f5f5f5); cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; color: var(--secondary-text-color); flex-shrink: 0; margin-top: 16px; }
+      .route-btn { padding: 7px 14px; font-size: 12px; font-weight: 500; border-radius: 8px; border: 1px solid var(--divider-color, #ccc); background: var(--secondary-background-color, #f5f5f5); color: var(--primary-text-color); cursor: pointer; white-space: nowrap; flex-shrink: 0; margin-top: 16px; }
       .route-btn.active { background: #185FA5; color: #E6F1FB; border-color: #185FA5; }
-      .route-summary { padding: 10px 14px; background: var(--secondary-background-color, #f5f5f5); border-bottom: 1px solid var(--divider-color, #e0e0e0); display: none; }
-      .route-summary.show { display: block; }
-      .rs-title { font-size: 12px; font-weight: 500; color: var(--primary-text-color); margin-bottom: 6px; }
-      .rs-steps { display: flex; flex-direction: column; gap: 4px; }
-      .rs-step { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--secondary-text-color); }
-      .rs-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-      .sl { font-size: 10px; font-weight: 500; color: var(--secondary-text-color); text-transform: uppercase; letter-spacing: .06em; padding: 10px 14px 6px; }
-      .alert-item { padding: 9px 14px; border-bottom: 1px solid var(--divider-color, #e0e0e0); display: flex; align-items: flex-start; gap: 9px; }
-      .alert-item:last-child { border-bottom: none; }
-      .ai-icon { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-      .ai-ok      { background: #1D9E7518; color: #1D9E75; }
-      .ai-warn    { background: #BA751718; color: #BA7517; }
-      .ai-danger  { background: #A32D2D18; color: #A32D2D; }
-      .ai-info    { background: #185FA518; color: #185FA5; }
-      .ai-muted   { background: #88888818; color: #888; }
-      .ai-name { font-size: 12px; font-weight: 500; color: var(--primary-text-color); }
-      .ai-desc { font-size: 11px; color: var(--secondary-text-color); margin-top: 2px; line-height: 1.4; }
-      .badge { font-size: 10px; padding: 2px 7px; border-radius: 999px; font-weight: 500; margin-left: 4px; }
-      .b-ok     { background: #1D9E7512; color: #0F6E56; }
-      .b-warn   { background: #BA751712; color: #854F0B; }
-      .b-danger { background: #A32D2D12; color: #791F1F; }
-      .b-info   { background: #185FA512; color: #0C447C; }
-      .b-muted  { background: #88888812; color: #666; }
+      .refresh-btn { font-size: 11px; border: 1px solid var(--divider-color,#ccc); border-radius: 8px; padding: 4px 9px; cursor: pointer; background: transparent; color: var(--secondary-text-color); flex-shrink: 0; }
       .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #1D9E75; display: inline-block; margin-right: 4px; animation: pdot 2s infinite; }
       @keyframes pdot { 0%,100%{opacity:1}50%{opacity:.35} }
-      .refresh-btn { font-size: 11px; border: 1px solid var(--divider-color,#ccc); border-radius: 8px; padding: 4px 9px; cursor: pointer; background: transparent; color: var(--secondary-text-color); }
+
+      /* ── ROUTE SUMMARY STRIP ── */
+      .route-strip { background: var(--secondary-background-color, #f5f5f5); border: 1px solid var(--divider-color, #e0e0e0); border-radius: 10px; padding: 8px 16px; display: none; align-items: center; gap: 16px; flex-wrap: wrap; flex-shrink: 0; margin-bottom: 8px; }
+      .route-strip.show { display: flex; }
+      .rs-title { font-size: 12px; font-weight: 500; color: var(--primary-text-color); }
+      .rs-steps { display: flex; gap: 12px; flex-wrap: wrap; }
+      .rs-step { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--secondary-text-color); }
+      .rs-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+      /* ── MAP: fills remaining space ── */
+      .map-card { background: var(--card-background-color, #fff); border: 1px solid var(--divider-color, #e0e0e0); border-radius: 12px; overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+      .map-hd { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid var(--divider-color, #e0e0e0); flex-shrink: 0; }
+      .map-hd-l { display: flex; align-items: center; gap: 10px; }
+      .map-wrap { background: #0d0f12; flex: 1; min-height: 0; display: flex; align-items: stretch; }
+      .map-wrap svg { width: 100%; height: 100%; display: block; }
+      .map-footer { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; border-top: 1px solid var(--divider-color, #e0e0e0); flex-shrink: 0; flex-wrap: wrap; gap: 8px; }
+      .legend { display: flex; gap: 12px; flex-wrap: wrap; }
+      .li { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--secondary-text-color); }
+      .ld { width: 18px; height: 6px; border-radius: 3px; }
+      .stats { display: flex; gap: 16px; }
+      .stat { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+      .stat-label { color: var(--secondary-text-color); }
+      .stat-val { font-weight: 500; color: var(--primary-text-color); }
+
+      /* ── ALERTS PANEL (slides in below route strip) ── */
+      .alerts-panel { background: var(--card-background-color, #fff); border: 1px solid var(--divider-color, #e0e0e0); border-radius: 10px; display: none; flex-shrink: 0; max-height: 200px; overflow-y: auto; margin-bottom: 8px; }
+      .alerts-panel.show { display: block; }
+      .alerts-hd { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid var(--divider-color, #e0e0e0); position: sticky; top: 0; background: var(--card-background-color, #fff); z-index: 1; }
+      .alerts-ht { font-size: 12px; font-weight: 500; color: var(--primary-text-color); }
+      .alerts-sub { font-size: 10px; color: var(--secondary-text-color); }
+      .alert-item { padding: 7px 14px; border-bottom: 1px solid var(--divider-color, #e0e0e0); display: flex; align-items: flex-start; gap: 8px; }
+      .alert-item:last-child { border-bottom: none; }
+      .ai-icon { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+      .ai-ok    { background: #1D9E7518; color: #1D9E75; }
+      .ai-warn  { background: #BA751718; color: #BA7517; }
+      .ai-danger{ background: #A32D2D18; color: #A32D2D; }
+      .ai-info  { background: #185FA518; color: #185FA5; }
+      .ai-muted { background: #88888818; color: #888; }
+      .ai-name { font-size: 11px; font-weight: 500; color: var(--primary-text-color); }
+      .ai-desc { font-size: 10px; color: var(--secondary-text-color); margin-top: 1px; line-height: 1.4; }
+      .badge { font-size: 9px; padding: 1px 6px; border-radius: 999px; font-weight: 500; margin-left: 4px; }
+      .b-ok    { background: #1D9E7512; color: #0F6E56; }
+      .b-warn  { background: #BA751712; color: #854F0B; }
+      .b-danger{ background: #A32D2D12; color: #791F1F; }
+      .b-info  { background: #185FA512; color: #0C447C; }
+      .b-muted { background: #88888812; color: #666; }
     `;
     root.appendChild(style);
 
-    /* Root grid */
-    const rootDiv = document.createElement("div");
-    rootDiv.className = "root";
-
-    /* Left: map card */
-    const leftCard = document.createElement("div");
-    leftCard.className = "card";
-
-    /* Header */
-    const hd = document.createElement("div");
-    hd.className = "card-hd";
-    hd.innerHTML = `
-      <div class="card-hd-l">
+    /* ── TOP BAR ── */
+    const topBar = document.createElement("div");
+    topBar.className = "top-bar";
+    topBar.innerHTML = `
+      <div class="top-bar-title">
         <span style="font-size:20px">🚇</span>
         <div>
           <div class="ht">TTC Transit</div>
-          <div class="hs" id="ttc-updated"><span class="live-dot"></span>Live · Loading…</div>
+          <div class="hs" id="ttc-updated"><span class="live-dot"></span>Loading…</div>
         </div>
+      </div>
+      <div class="rp-row">
+        <div class="sel-wrap"><div class="fl">From</div><select id="ttc-from"></select></div>
+        <button class="swap-btn" id="ttc-swap" title="Swap">⇄</button>
+        <div class="sel-wrap"><div class="fl">To</div><select id="ttc-to"></select></div>
+        <button class="route-btn" id="ttc-plan-btn">🔍 Find route</button>
       </div>
       <button class="refresh-btn" id="ttc-refresh-btn">↻ Refresh</button>
     `;
-    leftCard.appendChild(hd);
+    root.appendChild(topBar);
 
-    /* Map */
-    const mapWrap = document.createElement("div");
-    mapWrap.className = "map-wrap";
-    mapWrap.id = "ttc-map-wrap";
-    leftCard.appendChild(mapWrap);
-
-    /* Legend */
-    const legend = document.createElement("div");
-    legend.className = "legend";
-    legend.innerHTML = `
-      <div class="li"><div class="ld" style="background:#F9BC1B"></div>Line 1</div>
-      <div class="li"><div class="ld" style="background:#009E60"></div>Line 2</div>
-      <div class="li"><div class="ld" style="background:#C0392B"></div>Line 4</div>
-      <div class="li"><div class="ld" style="background:#9B59B6"></div>Eglinton LRT</div>
-      <div class="li"><div class="ld" style="background:#F9BC1B;opacity:.35;border-radius:2px"></div>Active alert</div>
+    /* ── ROUTE SUMMARY STRIP ── */
+    const routeStrip = document.createElement("div");
+    routeStrip.className = "route-strip";
+    routeStrip.id = "ttc-route-summary";
+    routeStrip.innerHTML = `
+      <div class="rs-title" id="ttc-rs-title"></div>
+      <div class="rs-steps" id="ttc-rs-steps"></div>
     `;
-    leftCard.appendChild(legend);
+    root.appendChild(routeStrip);
 
-    /* Stats */
-    const statRow = document.createElement("div");
-    statRow.className = "stat-row";
-    statRow.id = "ttc-stat-row";
-    statRow.innerHTML = `
-      <div class="stat"><div class="stat-n" id="st-alerts">—</div><div class="stat-l">Active alerts</div></div>
-      <div class="stat"><div class="stat-n" style="font-size:13px" id="st-l1">—</div><div class="stat-l">Line 1</div></div>
-      <div class="stat"><div class="stat-n" style="font-size:13px" id="st-l2">—</div><div class="stat-l">Line 2</div></div>
-    `;
-    leftCard.appendChild(statRow);
-
-    rootDiv.appendChild(leftCard);
-
-    /* Right column */
-    const rightCol = document.createElement("div");
-    rightCol.className = "right-col";
-
-    /* Route planner card */
-    const rpCard = document.createElement("div");
-    rpCard.className = "card";
-    rpCard.innerHTML = `
-      <div class="card-hd">
-        <div class="card-hd-l">
-          <span style="font-size:18px">🗺</span>
-          <div><div class="ht">Route planner</div><div class="hs">Filter alerts to your trip</div></div>
-        </div>
-      </div>
-      <div class="rp">
-        <div class="rp-row">
-          <div><div class="fl">From</div><select id="ttc-from"></select></div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="swap-btn" id="ttc-swap">⇄</button>
-          </div>
-          <div><div class="fl">To</div><select id="ttc-to"></select></div>
-        </div>
-        <button class="route-btn" id="ttc-plan-btn">🔍 Find route &amp; alerts</button>
-      </div>
-      <div class="route-summary" id="ttc-route-summary">
-        <div class="rs-title" id="ttc-rs-title"></div>
-        <div class="rs-steps" id="ttc-rs-steps"></div>
-      </div>
-    `;
-    rightCol.appendChild(rpCard);
-
-    /* Alerts card */
-    const alertCard = document.createElement("div");
-    alertCard.className = "card";
-    alertCard.style.flex = "1";
-    alertCard.innerHTML = `
-      <div class="card-hd">
-        <div class="card-hd-l">
-          <span style="font-size:18px">⚠️</span>
-          <div>
-            <div class="ht" id="ttc-alerts-title">Service alerts</div>
-            <div class="hs" id="ttc-alerts-sub">All monitored routes</div>
-          </div>
-        </div>
+    /* ── ALERTS PANEL ── */
+    const alertsPanel = document.createElement("div");
+    alertsPanel.className = "alerts-panel";
+    alertsPanel.id = "ttc-alerts-panel";
+    alertsPanel.innerHTML = `
+      <div class="alerts-hd">
+        <span class="alerts-ht" id="ttc-alerts-title">Service alerts</span>
+        <span class="alerts-sub" id="ttc-alerts-sub">All monitored routes</span>
       </div>
       <div id="ttc-alerts-list"></div>
     `;
-    rightCol.appendChild(alertCard);
-    rootDiv.appendChild(rightCol);
-    root.appendChild(rootDiv);
+    root.appendChild(alertsPanel);
+
+    /* ── MAP CARD ── */
+    const mapCard = document.createElement("div");
+    mapCard.className = "map-card";
+
+    const mapHd = document.createElement("div");
+    mapHd.className = "map-hd";
+    mapHd.innerHTML = `
+      <div class="map-hd-l">
+        <div class="stats">
+          <div class="stat"><span class="stat-label">Line 1</span><span class="stat-val" id="st-l1">—</span></div>
+          <div class="stat"><span class="stat-label">Line 2</span><span class="stat-val" id="st-l2">—</span></div>
+          <div class="stat"><span class="stat-label">Alerts</span><span class="stat-val" id="st-alerts">—</span></div>
+        </div>
+      </div>
+    `;
+    mapCard.appendChild(mapHd);
+
+    const mapWrap = document.createElement("div");
+    mapWrap.className = "map-wrap";
+    mapWrap.id = "ttc-map-wrap";
+    mapCard.appendChild(mapWrap);
+
+    const mapFooter = document.createElement("div");
+    mapFooter.className = "map-footer";
+    mapFooter.innerHTML = `
+      <div class="legend">
+        <div class="li"><div class="ld" style="background:#F9BC1B"></div>Line 1</div>
+        <div class="li"><div class="ld" style="background:#009E60"></div>Line 2</div>
+        <div class="li"><div class="ld" style="background:#C0392B"></div>Line 4</div>
+        <div class="li"><div class="ld" style="background:#9B59B6"></div>Eglinton LRT</div>
+        <div class="li"><div class="ld" style="background:#F9BC1B;opacity:.35;border-radius:2px"></div>Active alert</div>
+      </div>
+    `;
+    mapCard.appendChild(mapFooter);
+    root.appendChild(mapCard);
 
     /* Populate station selects */
     this._populateSelects();
@@ -509,10 +564,10 @@ class TtcTransitCard extends HTMLElement {
     root.getElementById("ttc-from").addEventListener("change", () => this._clearRoute());
     root.getElementById("ttc-to").addEventListener("change", () => this._clearRoute());
 
-    /* Initial map (blank) */
+    /* Initial map */
     mapWrap.appendChild(buildMap("#F9BC1B", "#009E60", "#C0392B", "#9B59B6", "normal", "normal", "normal"));
 
-    /* Pulse animation on delay overlay */
+    /* Pulse animation */
     this._startPulse();
   }
 
@@ -585,7 +640,8 @@ class TtcTransitCard extends HTMLElement {
   }
 
   _renderAlerts(alerts) {
-    const list = this.shadowRoot.getElementById("ttc-alerts-list");
+    const list  = this.shadowRoot.getElementById("ttc-alerts-list");
+    const panel = this.shadowRoot.getElementById("ttc-alerts-panel");
     if (!list) return;
     list.innerHTML = "";
 
@@ -620,12 +676,17 @@ class TtcTransitCard extends HTMLElement {
 
     const title = this.shadowRoot.getElementById("ttc-alerts-title");
     const sub   = this.shadowRoot.getElementById("ttc-alerts-sub");
-    if (this._currentRoute && title && sub) {
-      title.textContent = "Alerts for your route";
-      sub.textContent = `${visible} alert${visible !== 1 ? "s" : ""} on your lines`;
-    } else if (title && sub) {
-      title.textContent = "Service alerts";
-      sub.textContent = "All monitored routes";
+
+    if (this._currentRoute) {
+      if (title) title.textContent = "Alerts for your route";
+      if (sub)   sub.textContent   = `${visible} alert${visible !== 1 ? "s" : ""} on your lines`;
+      if (panel) panel.classList.add("show");
+    } else {
+      if (title) title.textContent = "Service alerts";
+      if (sub)   sub.textContent   = "All monitored routes";
+      // only show panel if there are active alerts
+      const hasAlerts = alerts.some(a => a.status !== "normal" && a.status !== "unknown");
+      if (panel) panel.classList.toggle("show", hasAlerts);
     }
   }
 
@@ -665,18 +726,18 @@ class TtcTransitCard extends HTMLElement {
 
     if (route.type === "direct") {
       title.textContent = `${route.from.name} → ${route.to.name}`;
-      steps.innerHTML = `<div class="rs-step"><div class="rs-dot" style="background:${LINE_COLORS[route.line] || "#888"}"></div><span>Take ${lineName(route.line)} — no transfer needed</span></div>`;
+      steps.innerHTML = `<div class="rs-step"><div class="rs-dot" style="background:${LINE_COLORS[route.line] || "#888"}"></div><span>Take ${lineName(route.line)} — direct</span></div>`;
     } else if (route.type === "transfer") {
       title.textContent = `${route.from.name} → ${route.to.name}`;
       const c1 = LINE_COLORS[route.line1] || "#888";
       const c2 = LINE_COLORS[route.line2] || "#888";
       steps.innerHTML = `
-        <div class="rs-step"><div class="rs-dot" style="background:${c1}"></div><span>Take ${lineName(route.line1)} to ${route.via.name}</span></div>
-        <div class="rs-step"><div class="rs-dot" style="background:#aaa;opacity:.5"></div><span>Transfer at ${route.via.name}</span></div>
-        <div class="rs-step"><div class="rs-dot" style="background:${c2}"></div><span>Take ${lineName(route.line2)} to ${route.to.name}</span></div>`;
+        <div class="rs-step"><div class="rs-dot" style="background:${c1}"></div><span>${lineName(route.line1)} to ${route.via.name}</span></div>
+        <div class="rs-step"><div class="rs-dot" style="background:#aaa;opacity:.5"></div><span>transfer</span></div>
+        <div class="rs-step"><div class="rs-dot" style="background:${c2}"></div><span>${lineName(route.line2)} to ${route.to.name}</span></div>`;
     } else {
       title.textContent = `${route.from.name} → ${route.to.name}`;
-      steps.innerHTML = `<div class="rs-step"><div class="rs-dot" style="background:#888"></div><span>Route requires bus/streetcar connection — check ttc.ca</span></div>`;
+      steps.innerHTML = `<div class="rs-step"><div class="rs-dot" style="background:#888"></div><span>Requires bus/streetcar — check ttc.ca</span></div>`;
     }
   }
 
@@ -726,6 +787,7 @@ class TtcTransitCard extends HTMLElement {
     if (rog) { rog.style.opacity = "0"; rog.innerHTML = ""; }
     this.shadowRoot.getElementById("ttc-route-summary")?.classList.remove("show");
     this.shadowRoot.getElementById("ttc-plan-btn")?.classList.remove("active");
+    this.shadowRoot.getElementById("ttc-alerts-panel")?.classList.remove("show");
     this._update();
   }
 
@@ -769,7 +831,7 @@ class TtcTransitCard extends HTMLElement {
     return { hass: {}, _config: {} };
   }
 
-  getCardSize() { return 6; }
+  getCardSize() { return 10; }
 }
 
 customElements.define("ttc-transit-card", TtcTransitCard);
