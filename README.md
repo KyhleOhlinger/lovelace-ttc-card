@@ -256,10 +256,6 @@ After saving, the dashboard will appear in your sidebar. The card fills the enti
 | Sensors show `unknown` | The REST sensor hasn't pulled data yet. Go to Developer Tools → Services, call `homeassistant.update_entity` with `entity_id: sensor.ttc_alerts_raw`, then check the state again. |
 | Entity IDs don't match | Open Developer Tools → States and search `ttc` to find the exact IDs on your instance. Update the dashboard YAML to match. |
 
-### Optional: Set Up Push Notifications
-
-Automations for push notifications when line status changes are included in `automations_ttc.yaml` in the [releases](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases/latest). Append these to your `automations.yaml` to get alerted when service is disrupted.
-
 ---
 
 ## Repository structure
@@ -287,6 +283,15 @@ lovelace-ttc-card/
 | Community RSS bridge | `https://liventnick.github.io/TTC-Alerts-RSS/ttc_feed.xml` | Backup |
 
 No API key required.
+
+---
+
+## Known Issues / Future Releases
+
+- **Station Name Rendering:** Some major stations currently experience text overlap or line replacement issues due to the way labels are rendered on the map. Future updates will improve station name placement and rendering logic to prevent labels from obscuring TTC lines or other map elements.
+- **Simplified Map Styling:** The current map includes both coloured line indicators and rendered line names. Since the map already contains a colour-based key, a future release may simplify the UI by removing embedded line names from the map itself to improve readability and reduce clutter.
+- **Default Route Configuration:** Planned support for configurable default start and end stations will allow users to define commonly used routes for quicker access to service updates and travel information without requiring repeated manual input.
+- **Improved Route Path Rendering:** Route mapping between stations currently uses straight-line interpolation, which can result in unrealistic visual paths. A future release will introduce coordinate-aware pathing that follows actual TTC track curvature and station routing more accurately for a more realistic visualization experience.
 
 ---
 
