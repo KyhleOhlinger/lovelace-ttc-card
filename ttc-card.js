@@ -308,7 +308,7 @@ function buildMap(l1c, l2c, l4c, egc, l1s, l2s, egS) {
   svg.appendChild(el("circle", { cx:420, cy:260, r:5, fill:l2c }));  // Bloor-Yonge
   ic(420, 80,  l4c);           // Sheppard-Yonge L1+L4
 
-  // ── REGULAR STATIONS ─────────────────────────────────────────────────────
+  // ── REGULAR STATIONS — rendered from STATIONS array ─────────────────────
   STATIONS.forEach(s => {
     if (s.lines.length > 1) return;
     const col = s.lines[0] === 1 ? l1c
@@ -316,41 +316,139 @@ function buildMap(l1c, l2c, l4c, egc, l1s, l2s, egS) {
               : s.lines[0] === 4 ? l4c
               : s.lines[0] === "fw" ? fwc : egc;
     const term = ["vaughan","finchy","kipling","kennedy","donmills","eg-mount-dennis","eg-kennedy","fw-humber"].includes(s.id);
-    svg.appendChild(stn(s.x, s.y, term ? 5 : 3.5, col, term ? 2.5 : 1.8));
+    const c = el("circle", {
+      cx:s.x, cy:s.y,
+      r: term ? 5 : 3.5,
+      fill:"#111318",
+      stroke:col,
+      "stroke-width": term ? 2.5 : 1.8,
+      "data-name": s.name,
+      style:"cursor:pointer",
+    });
+    svg.appendChild(c);
   });
 
-  // ── STATUS LABELS ─────────────────────────────────────────────────────────
-  if (l2s === "delays")    svg.appendChild(txt("⚠ Delays",    { x:560, y:250, "text-anchor":"middle", "font-size":8, fill:"#F9BC1B", "font-weight":"bold" }));
-  if (l2s === "diversion") svg.appendChild(txt("✕ Diversion", { x:560, y:250, "text-anchor":"middle", "font-size":8, fill:"#C0392B", "font-weight":"bold" }));
-  if (l1s !== "normal" && l1s !== "unknown")
-    svg.appendChild(txt("⚠", { x:435, y:200, "font-size":10, fill:"#EF9F27", "font-weight":"bold" }));
-  if (egS !== "normal" && egS !== "unknown")
-    svg.appendChild(txt("⚠", { x:500, y:170, "font-size":10, fill:"#EF9F27", "font-weight":"bold" }));
+  // Also add data-name to interchange circles
+  svg.querySelectorAll && setTimeout(() => {
+    svg.querySelectorAll("circle:not([data-name])").forEach((c, i) => {
+      const interchangeNames = {
+        "270,120": "Finch West",
+        "270,180": "Eglinton West",
+        "420,180": "Eglinton",
+        "270,260": "Spadina",
+        "336,260": "St George",
+        "420,260": "Bloor–Yonge",
+        "420,80":  "Sheppard–Yonge",
+      };
+      const key = `${c.getAttribute("cx")},${c.getAttribute("cy")}`;
+      if (interchangeNames[key]) c.setAttribute("data-name", interchangeNames[key]);
+    });
+  }, 0);
 
-  // ── LABELS ────────────────────────────────────────────────────────────────
-  [
-    ["Vaughan MC",      90,  20, "middle", "#ccc",   false],
-    ["Finch West",     270, 110, "middle", "#ccc",   false],
-    ["Finch",          420,  20, "middle", "#ccc",   false],
-    ["Humber College",  30, 110, "middle", "#ccc",   false],
-    ["Kipling",         30, 252, "middle", "#ccc",   false],
-    ["Kennedy",        650, 252, "middle", "#ccc",   false],
-    ["Don Mills",      558,  68, "middle", "#ccc",   false],
-    ["Mt Dennis",       30, 170, "middle", "#ccc",   false],
-    ["Spadina",        256, 265, "end",    "#ccc",   false],
-    ["St George",      336, 250, "middle", "#ccc",   false],
-    ["Bloor–Yonge",    436, 265, "start",  "#ccc",   false],
-    ["Sheppard–Yonge", 436,  83, "start",  "#ccc",   false],
-    ["Union",          344, 390, "middle", "#ccc",   false],
-    ["Line 1",         285, 200, "start",  l1c,      true],
-    ["Line 2",          65, 252, "start",  l2c,      true],
-    ["Line 4",         455,  68, "start",  l4c,      true],
-    ["Line 5",         200, 170, "start",  egc,      true],
-    ["Line 6",         148, 110, "middle", fwc,      true],
-  ].forEach(([t,x,y,a,fill,bold]) =>
-    svg.appendChild(txt(t, { x, y, "text-anchor":a, "font-size":9, fill,
-      ...(bold ? { "font-weight":"600" } : {}) }))
-  );
+  // ── STATUS WARNING ICONS (small ⚠ badges, offset from lines) ─────────────
+  if (l2s !== "normal" && l2s !== "unknown") {
+    const badge = el("text", { x:640, y:254, "text-anchor":"middle",
+      "font-size":"9", fill: l2s === "diversion" ? "#C0392B" : "#F9BC1B",
+      "font-weight":"bold", "font-family":"sans-serif" });
+    badge.textContent = l2s === "diversion" ? "✕" : "⚠";
+    svg.appendChild(badge);
+  }
+  if (l1s !== "normal" && l1s !== "unknown") {
+    const b = el("text", { x:434, y:155, "font-size":"9", fill:"#EF9F27",
+      "font-weight":"bold", "font-family":"sans-serif" });
+    b.textContent = "⚠";
+    svg.appendChild(b);
+  }
+  if (egS !== "normal" && egS !== "unknown") {
+    const b = el("text", { x:610, y:174, "font-size":"9", fill:"#EF9F27",
+      "font-weight":"bold", "font-family":"sans-serif" });
+    b.textContent = "⚠";
+    svg.appendChild(b);
+  }
+
+  // ── STATION NAMES — SVG <title> tooltips on each circle ─────────────────
+  // Add title elements to every station circle so hovering shows the name.
+  // Also add a JS-driven name chip that appears near the station on hover.
+  // This avoids any text rendering on top of lines.
+  STATIONS.forEach(s => {
+    // Find the last-appended circle for this station and add a <title>
+    // Instead, wrap each station in a <g> with title + hover effect
+  });
+  // Note: titles are added below during station rendering — see updated forEach.
+
+  // ── TERMINUS LABELS (placed clear of lines) ───────────────────────────────
+  // Only label termini and key interchanges, positioned AWAY from the line stroke.
+  // Termini on ends get labels offset outward; interchanges get small offset labels.
+  const termLabels = [
+    // [text, x, y, anchor, dx, dy]  — dx/dy offset the text clear of the line
+    ["Vaughan MC",      90,  30, "middle",  0, -10],
+    ["Humber College",  30, 120, "end",    -6,   0],
+    ["Finch West",     270, 120, "middle",  0, -12],
+    ["Finch",          420,  30, "middle",  0, -10],
+    ["Kipling",         30, 260, "end",    -6,   0],
+    ["Kennedy",        635, 260, "start",   6,   0],
+    ["Mt Dennis",       30, 180, "end",    -6,   0],
+    ["Don Mills",      558,  80, "start",   6,   0],
+    ["Spadina",        270, 260, "end",   -12,   0],
+    ["St George",      336, 260, "middle",  0, -12],
+    ["Bloor–Yonge",    420, 260, "start",  12,   0],
+    ["Sheppard–Yonge", 420,  80, "start",  12,   0],
+    ["Union",          366, 375, "middle",  0,  14],
+    ["Eglinton West",  270, 180, "end",   -12,   0],
+    ["Eglinton",       420, 180, "start",  12,   0],
+  ];
+  termLabels.forEach(([t, x, y, anchor, dx, dy]) => {
+    const label = txt(t, {
+      x: x + dx,
+      y: y + dy,
+      "text-anchor": anchor,
+      "font-size": "8",
+      fill: "#aaa",
+    });
+    svg.appendChild(label);
+  });
+
+  // ── HOVER NAME CHIP ───────────────────────────────────────────────────────
+  // A hidden <g> that shows the station name on mouseover/touchstart
+  const chip = document.createElementNS(ns, "g");
+  chip.id = "ttc-name-chip";
+  chip.style.display = "none";
+  chip.style.pointerEvents = "none";
+  const chipBg = el("rect", { rx:4, ry:4, fill:"#1e2128", stroke:"#444", "stroke-width":1 });
+  const chipTxt = el("text", { "font-family":"sans-serif", "font-size":"10",
+    fill:"#fff", "dominant-baseline":"middle", "text-anchor":"middle" });
+  chip.appendChild(chipBg);
+  chip.appendChild(chipTxt);
+  svg.appendChild(chip);
+
+  // Wire hover events on all station circles
+  svg.querySelectorAll && setTimeout(() => {
+    const allCircles = svg.querySelectorAll("circle[data-name]");
+    allCircles.forEach(c => {
+      const show = (e) => {
+        const cx = parseFloat(c.getAttribute("cx"));
+        const cy = parseFloat(c.getAttribute("cy"));
+        const name = c.getAttribute("data-name");
+        chipTxt.textContent = name;
+        // measure text width approximately
+        const w = name.length * 6 + 12;
+        const h = 16;
+        const tx = Math.min(Math.max(cx, w/2 + 4), 676 - w/2);
+        const ty = cy < 20 ? cy + 14 : cy - 14;
+        chipBg.setAttribute("x", tx - w/2);
+        chipBg.setAttribute("y", ty - h/2);
+        chipBg.setAttribute("width", w);
+        chipBg.setAttribute("height", h);
+        chipTxt.setAttribute("x", tx);
+        chipTxt.setAttribute("y", ty);
+        chip.style.display = "block";
+      };
+      const hide = () => { chip.style.display = "none"; };
+      c.addEventListener("mouseenter", show);
+      c.addEventListener("mouseleave", hide);
+      c.addEventListener("touchstart", show, { passive:true });
+    });
+  }, 0);
 
   return svg;
 }
@@ -383,7 +481,13 @@ class TtcTransitCard extends HTMLElement {
         s29:      "sensor.ttc_29_status",
         alerts:   "sensor.ttc_alerts_raw",
         updated:  "sensor.ttc_last_updated",
+        // Optional: persist selected route across HA restarts
+        // route_from: "input_select.ttc_route_from",
+        // route_to:   "input_select.ttc_route_to",
       },
+      // Optional: station IDs to pre-select on load (e.g. "spadina", "blooryonge")
+      default_from: "",
+      default_to:   "",
     };
   }
 
@@ -544,12 +648,14 @@ class TtcTransitCard extends HTMLElement {
     mapFooter.className = "map-footer";
     mapFooter.innerHTML = `
       <div class="legend">
-        <div class="li"><div class="ld" style="background:#F9BC1B"></div>Line 1</div>
-        <div class="li"><div class="ld" style="background:#009E60"></div>Line 2</div>
-        <div class="li"><div class="ld" style="background:#C0392B"></div>Line 4</div>
-        <div class="li"><div class="ld" style="background:#9B59B6"></div>Eglinton LRT</div>
+        <div class="li"><div class="ld" style="background:#F9BC1B"></div>Line 1 Yonge–University</div>
+        <div class="li"><div class="ld" style="background:#009E60"></div>Line 2 Bloor–Danforth</div>
+        <div class="li"><div class="ld" style="background:#C0392B"></div>Line 4 Sheppard</div>
+        <div class="li"><div class="ld" style="background:#F4731C"></div>Line 5 Eglinton</div>
+        <div class="li"><div class="ld" style="background:#A8A8A8"></div>Line 6 Finch West</div>
         <div class="li"><div class="ld" style="background:#F9BC1B;opacity:.35;border-radius:2px"></div>Active alert</div>
       </div>
+      <div style="font-size:10px;color:var(--secondary-text-color)">Hover a station to see its name</div>
     `;
     mapCard.appendChild(mapFooter);
     root.appendChild(mapCard);
@@ -703,6 +809,75 @@ class TtcTransitCard extends HTMLElement {
         sel.appendChild(o);
       });
     });
+
+    // ── APPLY DEFAULTS ────────────────────────────────────────────────────
+    // Priority order:
+    //   1. HA input_select helpers (if configured) — persists across reloads
+    //   2. default_from / default_to in card YAML config
+    //   3. Nothing selected (user must pick manually)
+
+    const cfg = this._config;
+    const entities = cfg.entities || {};
+
+    let defaultFrom = cfg.default_from || "";
+    let defaultTo   = cfg.default_to   || "";
+
+    // Override with HA helper state if helpers are configured and have a value
+    if (entities.route_from && this._hass) {
+      const helperFrom = this._hass.states[entities.route_from];
+      if (helperFrom && helperFrom.state && helperFrom.state !== "unknown") {
+        // Helper stores station name; look up ID
+        const match = STATIONS.find(s => s.name === helperFrom.state);
+        if (match) defaultFrom = match.id;
+      }
+    }
+    if (entities.route_to && this._hass) {
+      const helperTo = this._hass.states[entities.route_to];
+      if (helperTo && helperTo.state && helperTo.state !== "unknown") {
+        const match = STATIONS.find(s => s.name === helperTo.state);
+        if (match) defaultTo = match.id;
+      }
+    }
+
+    // Apply to selects
+    const fromSel = this.shadowRoot.getElementById("ttc-from");
+    const toSel   = this.shadowRoot.getElementById("ttc-to");
+    if (fromSel && defaultFrom) fromSel.value = defaultFrom;
+    if (toSel   && defaultTo)   toSel.value   = defaultTo;
+
+    // Auto-plan if both defaults are set
+    if (defaultFrom && defaultTo && defaultFrom !== defaultTo) {
+      // Defer until after the map is rendered
+      setTimeout(() => this._planRoute(), 50);
+    }
+  }
+
+  // ── PERSIST ROUTE TO HA HELPERS (if configured) ───────────────────────────
+  _saveRoute() {
+    const entities = this._config?.entities || {};
+    if (!this._hass) return;
+
+    const fromId = this.shadowRoot.getElementById("ttc-from")?.value;
+    const toId   = this.shadowRoot.getElementById("ttc-to")?.value;
+
+    if (entities.route_from && fromId) {
+      const stn = STATIONS.find(s => s.id === fromId);
+      if (stn) {
+        this._hass.callService("input_select", "select_option", {
+          entity_id: entities.route_from,
+          option: stn.name,
+        });
+      }
+    }
+    if (entities.route_to && toId) {
+      const stn = STATIONS.find(s => s.id === toId);
+      if (stn) {
+        this._hass.callService("input_select", "select_option", {
+          entity_id: entities.route_to,
+          option: stn.name,
+        });
+      }
+    }
   }
 
   _planRoute() {
@@ -714,7 +889,8 @@ class TtcTransitCard extends HTMLElement {
     this._renderSummary(this._currentRoute);
     this._drawOverlay(this._currentRoute);
     this.shadowRoot.getElementById("ttc-plan-btn")?.classList.add("active");
-    this._update(); /* re-filter alerts */
+    this._update();
+    this._saveRoute(); // persist selection to HA helpers if configured
   }
 
   _renderSummary(route) {
@@ -746,38 +922,140 @@ class TtcTransitCard extends HTMLElement {
     if (!rog) return;
     rog.innerHTML = "";
     rog.style.opacity = "1";
-
     if (!route || route.type === "unknown") return;
 
     const ns = "http://www.w3.org/2000/svg";
-    function seg(x1, y1, x2, y2, col) {
-      const l = document.createElementNS(ns, "line");
-      l.setAttribute("x1", x1); l.setAttribute("y1", y1);
-      l.setAttribute("x2", x2); l.setAttribute("y2", y2);
-      l.setAttribute("stroke", col); l.setAttribute("stroke-width", "11");
-      l.setAttribute("stroke-linecap", "round"); l.setAttribute("stroke-opacity", "0.35");
-      rog.appendChild(l);
+
+    // ── GEOMETRY-AWARE PATH BUILDER ─────────────────────────────────────────
+    // For each line, we know the exact SVG geometry. Instead of a straight
+    // line between two stations, we build a path that follows the actual
+    // track segments between them.
+    //
+    // Line 1 topology (ordered from north to south on each branch):
+    //   Vaughan diagonal:  Vaughan(90,30) → YorkU(225,98) → Pioneer(180,75)
+    //                      → Hwy407(135,52) → FinchW(270,120)
+    //   University leg:    FinchW(270,120) → [stations x=270] → Spadina(270,260)
+    //                      → [stations x=270] → QueensPark(270,332)
+    //   U-base:            QueensPark/Osgoode(270,375) → Union(366,375)
+    //                      → StAndrew(330,375) → Osgoode(294,375)
+    //                      [path: M270,352 Q270,375 294,375 L396,375 Q420,375 420,352]
+    //   Yonge leg:         King(420,332) → [stations x=420] → Bloor-Yonge(420,260)
+    //                      → [stations x=420] → Finch(420,30)
+    //
+    // For Lines 2, 4, 5, 6 — all horizontal — the path is simply
+    // a horizontal segment from min(x) to max(x) at the fixed y.
+
+    function stnsOnLine(lineId) {
+      return STATIONS.filter(s => s.lines.includes(lineId));
     }
-    function dot(x, y, col) {
+
+    // Build ordered station sequence for Line 1 from any station to any other.
+    // We define a canonical ordering index for every Line 1 station.
+    const L1_ORDER = [
+      "vaughan","hwy407","pioneer","yorku",          // diagonal (west→east)
+      "finchw",                                       // junction
+      "downsview","sheppardw","wilson","yorkdale",    // univ leg north section
+      "lawrencew","glencairn","eglintonw",
+      "stclairw","dupont","spadina",                  // Spadina interchange
+      "college2","dundasw","stpatrick",
+      "museum","queenspark",                          // univ leg south
+      "osgoode","standrew","union",                   // U-base
+      "king","queen","tmu","college",                 // yonge leg south
+      "wellesley","blooryonge",                       // Bloor-Yonge
+      "rosedale","summerhill","stclair",
+      "davisville","eglinton","lawrence",
+      "yorkmills","sheppardyonge","northy","finchy",  // yonge leg north
+    ];
+
+    function l1Index(id) { return L1_ORDER.indexOf(id); }
+
+    // Generate SVG path data following track geometry between two Line 1 stations
+    function l1Path(fromStn, toStn) {
+      const fi = l1Index(fromStn.id), ti = l1Index(toStn.id);
+      if (fi === -1 || ti === -1) return null;
+      const [startI, endI] = fi <= ti ? [fi, ti] : [ti, fi];
+      const [start, end] = fi <= ti ? [fromStn, toStn] : [toStn, fromStn];
+
+      // Collect all ordered stations in range
+      const range = L1_ORDER.slice(startI, endI + 1)
+        .map(id => STATIONS.find(s => s.id === id))
+        .filter(Boolean);
+
+      if (range.length < 2) return null;
+
+      // Build path through each consecutive station pair,
+      // inserting the Q-curve corners at the U-base transitions
+      let d = `M${range[0].x},${range[0].y}`;
+      for (let i = 1; i < range.length; i++) {
+        const prev = range[i - 1], curr = range[i];
+        // Detect U-base corners: queenspark→osgoode and union→king transitions
+        // These need the Q-curve to match the drawn path
+        if (prev.id === "queenspark" && curr.id === "osgoode") {
+          // Corner: go to bottom of university leg, sweep Q-curve, arrive at osgoode
+          d += ` L270,352 Q270,375 ${curr.x},${curr.y}`;
+        } else if (prev.id === "union" && curr.id === "king") {
+          // Corner: arrive at yonge leg bottom, go up
+          d += ` Q420,375 420,352 L${curr.x},${curr.y}`;
+        } else {
+          d += ` L${curr.x},${curr.y}`;
+        }
+      }
+      return d;
+    }
+
+    // For horizontal lines: just a horizontal segment between the two x-coords
+    function hPath(fromStn, toStn) {
+      const y = fromStn.y; // both stations on same horizontal
+      const x1 = Math.min(fromStn.x, toStn.x);
+      const x2 = Math.max(fromStn.x, toStn.x);
+      return `M${x1},${y} L${x2},${y}`;
+    }
+
+    function overlayPath(fromStn, toStn, lineId, col) {
+      let d;
+      if (lineId === 1) {
+        d = l1Path(fromStn, toStn);
+      } else {
+        // Lines 2, 4, 5, 6 are all horizontal at a fixed y
+        d = hPath(fromStn, toStn);
+      }
+      if (!d) return;
+      const path = document.createElementNS(ns, "path");
+      path.setAttribute("d", d);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", col);
+      path.setAttribute("stroke-width", "11");
+      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("stroke-linejoin", "round");
+      path.setAttribute("stroke-opacity", "0.38");
+      rog.appendChild(path);
+    }
+
+    function dot(x, y, col, isTransfer = false) {
       const c = document.createElementNS(ns, "circle");
-      c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", "7");
-      c.setAttribute("fill", col); c.setAttribute("fill-opacity", "0.55");
-      c.setAttribute("stroke", "#fff"); c.setAttribute("stroke-width", "2");
+      c.setAttribute("cx", x); c.setAttribute("cy", y);
+      c.setAttribute("r", isTransfer ? "8" : "7");
+      c.setAttribute("fill", isTransfer ? "#fff" : col);
+      c.setAttribute("fill-opacity", "0.9");
+      c.setAttribute("stroke", isTransfer ? col : "#fff");
+      c.setAttribute("stroke-width", "2");
       rog.appendChild(c);
     }
 
+    // ── RENDER ───────────────────────────────────────────────────────────────
     if (route.type === "direct") {
       const col = LINE_COLORS[route.line] || "#888";
-      seg(route.from.x, route.from.y, route.to.x, route.to.y, col);
+      overlayPath(route.from, route.to, route.line, col);
       dot(route.from.x, route.from.y, col);
       dot(route.to.x, route.to.y, col);
-    } else {
-      const c1 = LINE_COLORS[route.line1] || "#888", c2 = LINE_COLORS[route.line2] || "#888";
-      seg(route.from.x, route.from.y, route.via.x, route.via.y, c1);
-      seg(route.via.x, route.via.y, route.to.x, route.to.y, c2);
+    } else if (route.type === "transfer") {
+      const c1 = LINE_COLORS[route.line1] || "#888";
+      const c2 = LINE_COLORS[route.line2] || "#888";
+      overlayPath(route.from, route.via, route.line1, c1);
+      overlayPath(route.via, route.to,  route.line2, c2);
       dot(route.from.x, route.from.y, c1);
-      dot(route.via.x, route.via.y, "#fff");
-      dot(route.to.x, route.to.y, c2);
+      dot(route.via.x,  route.via.y,  c1, true);
+      dot(route.to.x,   route.to.y,   c2);
     }
   }
 

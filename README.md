@@ -1,4 +1,4 @@
-# TTC Transit Card
+# lovelace-ttc-card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/release/KyhleOhlinger/lovelace-ttc-card.svg)](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases)
@@ -8,7 +8,9 @@ A Home Assistant Lovelace card for Toronto commuters.
 
 **Live TTC subway map · Per-line service status · Route planner with filtered alerts**
 
-### What it does
+---
+
+## What it does
 
 - Draws a full schematic TTC subway map with all 75 stations across Line 1, Line 2, Line 4 Sheppard, and Eglinton LRT
 - Colours each line based on live Home Assistant sensor states — yellow is normal, amber is delayed, red is a diversion
@@ -20,7 +22,7 @@ No API key required. Uses the public TTC live alerts feed at `alerts.ttc.ca`.
 
 ---
 
-## How to Install
+## Installation
 
 ### Via HACS (recommended)
 
@@ -30,7 +32,7 @@ No API key required. Uses the public TTC live alerts feed at `alerts.ttc.ca`.
 4. Search for **TTC Transit Card** and click **Install**
 5. Restart Home Assistant
 
-### Manual Installation
+### Manual
 
 1. Download `dist/ttc-card.js` from the [latest release](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases/latest)
 2. Copy to `config/www/ttc-card.js`
@@ -39,16 +41,11 @@ No API key required. Uses the public TTC live alerts feed at `alerts.ttc.ca`.
 
 ---
 
-## How to Use the HA Integration
+## Sensor setup (required)
 
-The card reads status from Home Assistant sensors. You need to configure:
-1. A REST sensor that fetches live TTC alerts
-2. Template sensors to parse each line's status
-3. The Lovelace card itself
+The card reads status from HA sensors you configure. Add the following to your `configuration.yaml` (or use the package approach — see below).
 
-### Step 1: Configure the REST Sensor
-
-Add the following to your `configuration.yaml` (or to a separate file using the packages approach — see below):
+### REST sensor (polls TTC live alerts API)
 
 ```yaml
 rest:
@@ -63,9 +60,7 @@ rest:
           - routes
 ```
 
-### Step 2: Configure Template Sensors
-
-Add the following template sensors to parse the line statuses:
+### Template sensors (one per line)
 
 ```yaml
 template:
@@ -185,22 +180,118 @@ template:
              | reject('eq','normal') | reject('eq','unknown') | list | length }}
 ```
 
-**Tip:** A full copy-paste-ready `configuration_ttc.yaml` is included in the [releases](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases/latest).
-
-### Using the Packages Approach (Recommended)
-
-For easier maintenance, create `config/packages/ttc.yaml` and paste the full sensor YAML there. Then add to `configuration.yaml`:
-
-```yaml
-homeassistant:
-  packages: !include_dir_named packages/
-```
-
-This keeps all TTC config isolated and easy to update.
+A full copy-paste-ready `configuration_ttc.yaml` is included in the [releases](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases/latest).
 
 ---
 
-## How to Create a Dashboard
+## Lovelace card configuration
+
+```yaml
+type: custom:ttc-transit-card
+entities:
+  line1:    sensor.ttc_line_1_status
+  line2:    sensor.ttc_line_2_status
+  line4:    sensor.ttc_line_4_status
+  eglinton: sensor.ttc_eglinton_status
+  s504:     sensor.ttc_504_status
+  s29:      sensor.ttc_29_status
+  alerts:   sensor.ttc_alerts_raw
+  updated:  sensor.ttc_last_updated
+  # Optional: persist selected route across HA restarts (see below)
+  # route_from: input_select.ttc_route_from
+  # route_to:   input_select.ttc_route_to
+# Optional: pre-select stations on load (use station IDs from the list below)
+default_from: ""
+default_to:   ""
+```
+
+All `entities` keys are optional — the defaults match the sensor names above.
+
+### Default route configuration
+
+You can configure a default start and end station so your most-used commute route loads automatically every time the dashboard opens, with the route already highlighted on the map and alerts pre-filtered to your lines.
+
+**Option A — Simple defaults (card YAML only):**
+
+```yaml
+type: custom:ttc-transit-card
+default_from: spadina
+default_to:   blooryonge
+entities:
+  ...
+```
+
+The card will pre-select these stations and auto-plan the route on every load. If you change the selection manually it updates immediately, but the defaults will reappear on the next full page load.
+
+**Option B — Persistent defaults (survives HA restarts and dashboard reloads):**
+
+Add `input_select` helpers and link them in the card config. The card reads from these on load and writes back every time you plan a route, so your last-used route is remembered permanently.
+
+Step 1 — add to `configuration.yaml`:
+```yaml
+input_select:
+  ttc_route_from:
+    name: "TTC From station"
+    options:
+      - ""
+      - "Spadina"
+      - "Bloor–Yonge"
+      - "Union"
+      - "Finch West"
+      # add any stations you commonly use
+    icon: mdi:map-marker
+
+  ttc_route_to:
+    name: "TTC To station"
+    options:
+      - ""
+      - "Spadina"
+      - "Bloor–Yonge"
+      - "Union"
+      - "Finch West"
+    icon: mdi:map-marker-check
+```
+
+Step 2 — link in the card config:
+```yaml
+type: custom:ttc-transit-card
+entities:
+  ...
+  route_from: input_select.ttc_route_from
+  route_to:   input_select.ttc_route_to
+```
+
+With this setup: when you pick a route and tap "Find route", the card calls `input_select.select_option` to save both stations to HA. On next load, the card reads those helpers and auto-plans the saved route immediately.
+
+### Station IDs
+
+Use these IDs in `default_from` / `default_to`:
+
+| Station | ID | Line |
+|---|---|---|
+| Vaughan MC | `vaughan` | 1 |
+| Finch West | `finchw` | 1, 6 |
+| Finch | `finchy` | 1 |
+| Sheppard West | `sheppardw` | 1 |
+| Sheppard–Yonge | `sheppardyonge` | 1, 4 |
+| Eglinton West | `eglintonw` | 1, 5 |
+| Eglinton | `eglinton` | 1, 5 |
+| Spadina | `spadina` | 1, 2 |
+| St George | `stgeorge` | 1, 2 |
+| Bloor–Yonge | `blooryonge` | 1, 2 |
+| Union | `union` | 1 |
+| Osgoode | `osgoode` | 1 |
+| Kipling | `kipling` | 2 |
+| Kennedy | `kennedy` | 2 |
+| Don Mills | `donmills` | 4 |
+| Humber College | `fw-humber` | 6 |
+| Mount Dennis | `eg-mount-dennis` | 5 |
+
+Full station ID list is in `dist/ttc-card.js` in the `STATIONS` array.
+
+---
+
+## Creating the dashboard
 
 The card is designed to run in **panel mode** — a single full-screen view with the route planner bar pinned at the top and the map filling the remaining height.
 
@@ -226,9 +317,9 @@ views:
     cards:
       - type: custom:ttc-transit-card
         entities:
-          line1:    sensor.ttc_line1_status
-          line2:    sensor.ttc_line2_status
-          line4:    sensor.ttc_line4_status
+          line1:    sensor.ttc_line_1_status
+          line2:    sensor.ttc_line_2_status
+          line4:    sensor.ttc_line_4_status
           eglinton: sensor.ttc_eglinton_status
           s504:     sensor.ttc_504_status
           s29:      sensor.ttc_29_status
@@ -255,6 +346,25 @@ After saving, the dashboard will appear in your sidebar. The card fills the enti
 | Map renders but all lines are grey | The template sensors exist but can't reach `sensor.ttc_alerts_raw`. Check that the REST sensor is configured in `configuration.yaml` and HA has been restarted. |
 | Sensors show `unknown` | The REST sensor hasn't pulled data yet. Go to Developer Tools → Services, call `homeassistant.update_entity` with `entity_id: sensor.ttc_alerts_raw`, then check the state again. |
 | Entity IDs don't match | Open Developer Tools → States and search `ttc` to find the exact IDs on your instance. Update the dashboard YAML to match. |
+
+---
+
+## Using the packages approach (optional, recommended)
+
+Create `config/packages/ttc.yaml` and paste the full sensor YAML there. Then add to `configuration.yaml`:
+
+```yaml
+homeassistant:
+  packages: !include_dir_named packages/
+```
+
+This keeps all TTC config isolated and easy to update.
+
+---
+
+## Automations (optional)
+
+Automations for push notifications when line status changes are included in `automations_ttc.yaml` in the [releases](https://github.com/KyhleOhlinger/lovelace-ttc-card/releases/latest). Append to your `automations.yaml`.
 
 ---
 
@@ -286,12 +396,9 @@ No API key required.
 
 ---
 
-## Known Issues / Future Releases
+## Publishing to the default HACS store
 
-- **Station Name Rendering:** Some major stations currently experience text overlap or line replacement issues due to the way labels are rendered on the map. Future updates will improve station name placement and rendering logic to prevent labels from obscuring TTC lines or other map elements.
-- **Simplified Map Styling:** The current map includes both coloured line indicators and rendered line names. Since the map already contains a colour-based key, a future release may simplify the UI by removing embedded line names from the map itself to improve readability and reduce clutter.
-- **Default Route Configuration:** Planned support for configurable default start and end stations will allow users to define commonly used routes for quicker access to service updates and travel information without requiring repeated manual input.
-- **Improved Route Path Rendering:** Route mapping between stations currently uses straight-line interpolation, which can result in unrealistic visual paths. A future release will introduce coordinate-aware pathing that follows actual TTC track curvature and station routing more accurately for a more realistic visualization experience.
+To be included in the default HACS store (so anyone can find it without adding a custom repo), submit a pull request to [hacs/default](https://github.com/hacs/default) following their [inclusion requirements](https://hacs.xyz/docs/publish/include/). Your repo must have at least one GitHub release and pass HACS validation.
 
 ---
 
